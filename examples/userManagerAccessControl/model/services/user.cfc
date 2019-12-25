@@ -8,59 +8,32 @@ component accessors=true {
 
 		// since services are cached, user data will be persisted
 		// ideally, this would be saved elsewhere, e.g. database
+		
+		qUsers = queryExecute( "SELECT * FROM users u where u.email = email"  );
+		for (row in qUsers) {
+			// FIRST
+			var user = variables.beanFactory.getBean( "userBean" );
+			user.setId(qUsers.user_id);
+			user.setFirstName(qUsers.fname);
+			user.setLastName(qUsers.lname);
+			user.setEmail(qUsers.email);
+			user.setDepartmentId("1");
+			user.setDepartment(variables.departmentService.get("1"));
+			user.setRoleId("1");
+			user.setRole(arguments.roleService.get("1"));
+			// set the password.  typically the hash and salt would be in a database.
+			// avoid plain text passwords in files or the database
+			//var passwordHashSalt = hashPassword('admin');
+			var passwordHashSalt = hashPassword('#qUsers.pwd_hash#');
+			user.setPasswordHash(passwordHashSalt.hash);
+			user.setPasswordSalt(passwordHashSalt.salt);
 
-		// FIRST
-        var user = variables.beanFactory.getBean( "userBean" );
-		user.setId("1");
-		user.setFirstName("Admin");
-		user.setLastName("User");
-		user.setEmail("admin@mysite.com");
-		user.setDepartmentId("1");
-		user.setDepartment(variables.departmentService.get("1"));
-		user.setRoleId("1");
-		user.setRole(arguments.roleService.get("1"));
-		// set the password.  typically the hash and salt would be in a database.
-		// avoid plain text passwords in files or the database
-		var passwordHashSalt = hashPassword('admin');
-		user.setPasswordHash(passwordHashSalt.hash);
-		user.setPasswordSalt(passwordHashSalt.salt);
-
-		variables.users[user.getId()] = user;
-
-		// SECOND
-		user = variables.beanFactory.getBean( "userBean" );
-		user.setId("2");
-		user.setFirstName("Larry");
-		user.setLastName("Stooge");
-		user.setEmail("larry@stooges.com");
-		user.setDepartmentId("2");
-		user.setDepartment(variables.departmentService.get("2"));
-		user.setRoleId("2");
-		user.setRole(arguments.roleService.get("2"));
-		passwordHashSalt = hashPassword('larryrulz');
-		user.setPasswordHash(passwordHashSalt.hash);
-		user.setPasswordSalt(passwordHashSalt.salt);
-
-		variables.users[user.getId()] = user;
-
-		// THIRD
-		user = variables.beanFactory.getBean( "userBean" );
-		user.setId("3");
-		user.setFirstName("Moe");
-		user.setLastName("Stooge");
-		user.setEmail("moe@stooges.com");
-		user.setDepartmentId("3");
-		user.setDepartment(variables.departmentService.get("3"));
-		user.setRoleId("2");
-		user.setRole(arguments.roleService.get("2"));
-		passwordHashSalt = hashPassword('moerulz');
-		user.setPasswordHash(passwordHashSalt.hash);
-		user.setPasswordSalt(passwordHashSalt.salt);
-
-		variables.users[user.getId()] = user;
+			variables.users[user.getId()] = user;	
+		}
 
 		// BEN
-		variables.nextid = 4;
+		//variables.nextid = 4;
+		variables.nextid = #qUsers.recordCount#;
 
         return this;
     }
@@ -141,10 +114,20 @@ component accessors=true {
 
     function save( any user ) { 
         if ( user.getId() ) {
-            variables.users[ user.getId() ] = user;
+			qUpdateUsers = queryExecute( "
+				UPDATE
+				`cedar_creek_church_db`.`users`
+				SET
+				`pwd_hash` = '#user.getPasswordHash()#',
+				`pwd_salt` = '',
+				`last_modified` = now()
+				WHERE `user_id` = #user.getId()#
+			"  );
+
         } else {
             // new user
-            // BEN
+			// BEN
+			
             lock type="exclusive" name="setNextID" timeout="10" throwontimeout="false" {
                 var newId = variables.nextId;
                 ++variables.nextId;

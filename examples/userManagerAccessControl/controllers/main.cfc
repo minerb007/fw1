@@ -21,7 +21,6 @@ component accessors=true {
         rc.passwordSalt = newPasswordHash.salt;
         // this will update any user fields from RC so it's a bit overkill here
         variables.fw.populate( cfc = rc.user, trim = true );
-
         variables.userService.save( rc.user );
         rc.message = ["Your password was changed"];
         variables.fw.redirect( "main", "message" );

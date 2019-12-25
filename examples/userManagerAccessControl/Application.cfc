@@ -6,6 +6,7 @@ component accessors=true extends="framework.one" {
 	this.name = 'fw1-userManager-accessControl-5';
 	this.sessionmanagement = true;
 	this.sessiontimeout = createTimeSpan(0,2,0,0);
+	this.datasource = "cedar_creek_church_db";
 
 	// FW/1 - configuration:
 	variables.framework = {
@@ -15,24 +16,28 @@ component accessors=true extends="framework.one" {
 	function setupApplication() {
 		application.adminEmail = 'admin@mysite.com';
 		if ( variables.keyExists( "departmentService" ) )
-			writeDump( var = variables.departmentService, label = "setupApplication" );
+			//writeDump( var = variables.departmentService, label = "setupApplication" )
+			;
 	}
 
 	function setupSession() {
 		controller( 'security.session' );
 		if ( variables.keyExists( "departmentService" ) )
-			writeDump( var = variables.departmentService, label = "setupSession" );
+			//writeDump( var = variables.departmentService, label = "setupSession" )
+			;
 	}
 
 	function setupRequest() {
 		controller( 'security.authorize' );
 		if ( variables.keyExists( "departmentService" ) )
-			writeDump( var = variables.departmentService, label = "setupRequest" );
+			//writeDump( var = variables.departmentService, label = "setupRequest" )
+			;
 	}
 
 	function setupView( rc ) {
 		if ( variables.keyExists( "departmentService" ) ) {
-			writeDump( var = variables.departmentService, label = "setupView" );
+			//writeDump( var = variables.departmentService, label = "setupView" )
+			;
 			rc.d1 = departmentService.get( 1 );
 		}
 	}
